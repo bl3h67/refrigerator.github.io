@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Citebox – Free APA, MLA, Harvard &amp; Chicago Citation Generator</title>
+  <meta name="description" content="Free citation generator and reference manager. Cite websites, books and journal articles in APA, MLA, Harvard, Chicago, IEEE, AMA and Vancouver. Everything is stored on your device.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <script>
+    // apply theme before first paint to avoid a flash
+    (function () {
+      try {
+        var t = JSON.parse(localStorage.getItem('citebox:v1') || '{}').theme;
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) { document.documentElement.dataset.theme = 'light'; }
+    })();
+  </script>
+</head>
+<body>
+  <!-- loading splash -->
+  <div id="splash" class="splash">
+    <div class="splash-inner">
+      <div class="brand brand-lg"><span class="brand-mark"></span>Citebox</div>
+      <div class="splash-bar"><span></span></div>
+      <div class="splash-msg" id="splashMsg">Sharpening pencils…</div>
+    </div>
+  </div>
+
+  <div class="app preload" id="app">
+    <!-- sidebar -->
+    <aside class="sidebar" id="sidebar" aria-label="Projects">
+      <div class="sb-head">
+        <div class="brand"><span class="brand-mark"></span>Citebox</div>
+        <button class="icon-btn" id="themeBtn" data-tip="Toggle dark mode" aria-label="Toggle dark mode"></button>
+      </div>
+      <div class="sb-actions">
+        <div class="split">
+          <button class="btn btn-outline" id="newProjectBtn"><span class="ic" data-i="filePlus"></span>Start new project</button>
+          <button class="btn btn-outline split-caret" id="newMenuBtn" aria-label="More create options"><span class="ic" data-i="chevDown"></span></button>
+        </div>
+        <button class="icon-btn" id="projSearchBtn" data-tip="Search projects" aria-label="Search projects"><span class="ic" data-i="search"></span></button>
+      </div>
+      <div class="sb-search" id="projSearchWrap" hidden>
+        <input type="search" id="projSearch" placeholder="Search projects…" autocomplete="off">
+      </div>
+      <nav class="tree" id="tree"></nav>
+      <div class="sb-foot">
+        <div class="sb-storage" id="sbStorage"></div>
+        <div class="sb-foot-btns">
+          <button class="btn btn-sm btn-ghost" id="sbSaveBtn"><span class="ic" data-i="save"></span>Save to device</button>
+          <button class="btn btn-sm btn-ghost" id="sbOpenBtn"><span class="ic" data-i="folderOpen"></span>Open</button>
+        </div>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <!-- main -->
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn" id="sidebarBtn" data-tip="Toggle sidebar" aria-label="Toggle sidebar"><span class="ic" data-i="sidebar"></span></button>
+        <button class="icon-btn" id="undoBtn" data-tip="Undo (Ctrl+Z)" aria-label="Undo"><span class="ic" data-i="undo"></span></button>
+        <button class="icon-btn" id="redoBtn" data-tip="Redo (Ctrl+Shift+Z)" aria-label="Redo"><span class="ic" data-i="redo"></span></button>
+        <div class="crumbs" id="crumbs"></div>
+        <div class="grow"></div>
+        <button class="btn btn-outline btn-pill hide-sm" id="saveBtn" data-tip="Save everything to a file on this device (Ctrl+S)"><span class="ic" data-i="save"></span><span class="lbl">Save</span><span class="dirty-dot" id="dirtyDot"></span></button>
+        <button class="btn btn-outline btn-pill" id="shareBtn"><span class="ic" data-i="share"></span><span class="lbl hide-sm">Share</span></button>
+        <button class="btn btn-primary btn-pill" id="downloadBtn"><span class="ic" data-i="download"></span><span class="lbl hide-sm">Download References</span></button>
+        <button class="icon-btn icon-btn-round" id="dataBtn" data-tip="Your data" aria-label="Your data"><span class="ic" data-i="user"></span></button>
+      </header>
+
+      <div class="scroll" id="scroll">
+        <div class="workspace">
+          <!-- citation search -->
+          <section class="cite-box" id="citeBox">
+            <div class="tabs-row">
+              <span class="cite-a">Cite a:</span>
+              <div class="tabs" id="tabs" role="tablist"></div>
+            </div>
+            <div class="search-row" id="searchRow">
+              <div class="search-field">
+                <input type="text" id="searchInput" autocomplete="off" spellcheck="false">
+                <div class="pre-editor" id="preEditor" contenteditable="true" hidden data-placeholder="Paste or type a reference that is already formatted. Select text and press Ctrl+I for italics."></div>
+                <div class="search-icons">
+                  <button class="icon-btn icon-btn-sm" id="pasteBtn" data-tip="Paste from clipboard" aria-label="Paste"><span class="ic" data-i="clipboard"></span></button>
+                  <button class="icon-btn icon-btn-round icon-btn-sm" id="manualBtn" data-tip="Cite manually" aria-label="Cite manually"><span class="ic" data-i="keyboard"></span></button>
+                  <button class="icon-btn icon-btn-round icon-btn-sm" id="importBtn" data-tip="Import a BibTeX, RIS or backup file" aria-label="Import file"><span class="ic" data-i="fileImport"></span></button>
+                  <button class="icon-btn icon-btn-sm" id="italicBtn" hidden data-tip="Italic (Ctrl+I)" aria-label="Italic"><b><i>I</i></b></button>
+                </div>
+              </div>
+              <button class="btn btn-green" id="searchBtn"><span class="ic" data-i="search"></span><span class="lbl">Search</span></button>
+              <button class="icon-btn" id="lockBtn" data-tip="Lock project to prevent changes" aria-label="Lock project"><span class="ic" data-i="unlock"></span></button>
+            </div>
+          </section>
+
+          <!-- toolbar -->
+          <div class="toolbar" id="toolbar">
+            <label class="check" data-tip="Select all"><input type="checkbox" id="selectAll"><span></span></label>
+            <div class="tb-normal" id="tbNormal">
+              <div class="select-wrap hide-sm"><select id="fontSel" aria-label="Font"></select></div>
+              <div class="select-wrap hide-sm"><select id="sizeSel" aria-label="Font size"></select></div>
+              <div class="grow"></div>
+              <button class="style-btn" id="styleBtn"><span class="ic" data-i="style"></span><span id="styleLbl"></span><span class="ic" data-i="chevDown"></span></button>
+              <div class="grow"></div>
+              <button class="ghost-select" id="sortBtn"><span class="ic" data-i="sort"></span><span id="sortLbl">Auto sort</span><span class="ic" data-i="chevDown"></span></button>
+            </div>
+            <div class="tb-selected" id="tbSelected" hidden>
+              <span class="sel-count" id="selCount"></span>
+              <button class="btn btn-sm btn-ghost" id="selCopy"><span class="ic" data-i="copy"></span>Copy</button>
+              <button class="btn btn-sm btn-ghost" id="selMove"><span class="ic" data-i="move"></span>Move / copy to…</button>
+              <button class="btn btn-sm btn-ghost hide-sm" id="selExport"><span class="ic" data-i="download"></span>Export</button>
+              <div class="grow"></div>
+              <button class="btn btn-sm btn-danger-ghost" id="selDelete"><span class="ic" data-i="trash"></span>Delete</button>
+            </div>
+          </div>
+
+          <!-- reference list -->
+          <article class="paper" id="paper">
+            <h2 class="paper-heading" id="paperHeading">References</h2>
+            <ol class="refs" id="refs"></ol>
+            <div class="empty" id="empty" hidden>
+              <div class="empty-art" aria-hidden="true"></div>
+              <h3>No references</h3>
+              <p>There are no references in this project yet.</p>
+              <p>Use the search bar above to add your sources.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <footer class="statusbar">
+        <span class="file-link" id="fileLink"></span>
+        <div class="grow"></div>
+        <span class="stat" id="wordCount">0 words</span>
+        <span class="stat" id="savedStat"><span class="ic" data-i="clock"></span><span id="savedTxt">saved</span></span>
+        <button class="icon-btn icon-btn-sm" id="helpBtn" data-tip="Keyboard shortcuts &amp; help" aria-label="Help"><span class="ic" data-i="help"></span></button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="layer"></div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="tooltip" id="tooltip" role="tooltip"></div>
+
+  <script src="js/formatter.js?v=3"></script>
+  <script src="js/lookup.js?v=3"></script>
+  <script src="js/io.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
+</body>
+</html>
